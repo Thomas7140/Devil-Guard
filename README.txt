@@ -1,84 +1,63 @@
-Devilish Services Nova Lobby - 3 Game Update
+Devilish Services Nova Lobby - Shared Lobby UI
 ================================================
 
-This package adds/updates:
+GOAL
+====
+All game lobbies now use the Delta Force Xtreme lobby as the master
+format and layout.
 
-1. Main root lobby:
-   https://nova-lobby.devilishservices.com/
+The active shared layout file is:
 
-   Panels:
-   - BHD  -> /bhd/
-   - DFX  -> /DFX/
-   - DFX2 -> /dfx2/
+    /assets/lobby.css
 
-   Root panel images:
-   - /images/DFBHD.avif
-   - /images/DFX.avif
-   - /images/DFX2.avif
+That single file controls:
 
-2. DFX lobby
-   The existing DFX BHD-style lobby remains in /DFX/.
+- page width and spacing
+- top navigation
+- live server hero
+- four summary cards
+- Search / Source / Game type / Population / Sort filters
+- Apply / Reset controls
+- Live Servers heading
+- server table
+- status dot column
+- View buttons
+- server detail pages
+- About pages
+- responsive/mobile layout
+- no horizontal scrolling server list
 
-3. DFX2 lobby
-   A new BHD-style lobby is provided in /dfx2/.
-
-4. BHD Main Lobby button
-   The package intentionally does NOT replace your existing working
-   bhd/index.php.
-
-   Run this once after uploading the package:
-
-       cd /home/devilishservices/public_html/sub-domains/nova-lobby.devilishservices.com
-       php tools/patch-bhd-main-lobby.php
-
-   The script:
-   - locates bhd/index.php
-   - makes a timestamped backup
-   - adds a fixed "Main Lobby" button linking to /
-   - refuses to patch it twice
-
-DFX2 DATABASE
-=============
-
-Default connection file:
-
-    /home/devilishservices/connections/dfx2/db.php
-
-Default tables:
-
-    dfx2_servers
-    dfx2_server_players
-
-Edit:
-
-    dfx2/includes/config.php
-
-if your path or table names are different.
-
-A compatible schema is included at:
-
-    dfx2/sql/dfx2_lobby_tables.sql
-
-An example PDO connection file is included at:
-
-    dfx2/db.example.php
-
-Do not upload db.example.php into the shared connections directory
-without replacing the placeholder username/password.
-
-IMAGES
+THEMES
 ======
+Each lobby selects a theme on the BODY element.
 
-This package references the image files already on your web server:
+BHD:
+    <body data-lobby-theme="bhd">
 
-    images/DFBHD.avif
-    images/DFX.avif
-    images/DFX2.avif
+DFX:
+    <body data-lobby-theme="dfx">
 
-Make sure the capitalization matches exactly.
+DFX2:
+    <body data-lobby-theme="dfx2">
 
-TEST URLS
-=========
+All theme colors are also stored in:
+
+    /assets/lobby.css
+
+Current themes:
+
+    BHD   = military green
+    DFX   = blue / steel / cyan
+    DFX2  = orange / brown
+
+This means future layout changes should normally be made ONLY in:
+
+    /assets/lobby.css
+
+and they will apply to every lobby.
+
+LOBBIES
+=======
 
 Main:
     https://nova-lobby.devilishservices.com/
@@ -92,67 +71,143 @@ DFX:
 DFX2:
     https://nova-lobby.devilishservices.com/dfx2/
 
+ROOT PANEL IMAGES
+=================
 
-BHD DFX-STYLE HEADER
+BHD:
+    /images/DFBHD.avif
+
+DFX:
+    /images/DFX.avif
+
+DFX2:
+    /images/DFX2.avif
+
+DFX LOBBY IMAGE
+===============
+
+The DFX lobby itself continues to use:
+
+    /DFX/dfx.webp
+
+for its server/header image.
+
+BHD INSTALL / UPDATE
 ====================
 
-To make the BHD header match the simple DFX-style navigation, run:
+The BHD site has older PHP markup and live Nova/NovaHQ logic that should
+not be replaced blindly.
 
-    cd /home/devilishservices/public_html/sub-domains/nova-lobby.devilishservices.com
-    php tools/patch-bhd-dfx-style-header.php
-
-The patcher backs up:
-
-    bhd/partials.php
-
-before replacing only render_header().
-
-The new BHD header becomes:
-
-    Delta Force: Black Hawk Down
-    Devilish Services Nova Lobby
-
-    Main Lobby | BHD Lobby | About
-
-This removes the old visual header wording such as:
-
-    DEVILISH SERVICES
-    NOVA BHD LOBBY
-    Delta Force: Black Hawk Down Multiplayer Network
-    LIVE NETWORK
-    Servers | Gametypes | System
-
-from the shared page header while leaving the BHD server browser and
-the rest of the BHD page content unchanged.
-
-
-BHD MATCH DFX LAYOUT
-====================
-
-To make /bhd/ use the same layout style as /DFX/, upload this package
-over the nova-lobby site root and run:
+After uploading this package over the nova-lobby web root, run:
 
     cd /home/devilishservices/public_html/sub-domains/nova-lobby.devilishservices.com
     php tools/patch-bhd-match-dfx-layout.php
 
-This patch:
+The patcher:
 
-- keeps the existing BHD PHP/server-fetch logic
-- keeps Nova/NovaHQ sources
-- keeps BHD filters and server metadata
-- keeps View/Join behavior
 - backs up bhd/index.php
 - backs up bhd/partials.php
-- installs bhd/assets/dfx-layout.css
-- changes the BHD shared header to:
+- preserves BHD server fetching
+- preserves Nova/NovaHQ data
+- preserves tilde colors
+- preserves BHD View/Join behavior
+- removes the old BHD intro/branding panels
+- changes the header to:
       Delta Force: Black Hawk Down
       Devilish Services Nova Lobby
       Main Lobby | BHD Lobby | About
-- changes the hero wording to:
-      LIVE SERVER LIST
-      Delta Force: Black Hawk Down
-      Delta Force: Black Hawk Down multiplayer servers
-- styles the BHD stat cards, filters, table, buttons and responsive
-  layout to match the DFX lobby geometry and spacing
+- loads the shared /assets/lobby.css file
+- selects the BHD theme with data-lobby-theme="bhd"
 
-The BHD theme remains green rather than DFX blue.
+The older BHD patch scripts are no longer required.
+
+DFX
+===
+
+DFX pages now load:
+
+    /assets/lobby.css
+
+with:
+
+    data-lobby-theme="dfx"
+
+Files:
+    DFX/index.php
+    DFX/server.php
+    DFX/about.php
+
+The DFX server list status indicator is a dot-only column immediately
+before CN.
+
+DFX2
+====
+
+DFX2 pages now load:
+
+    /assets/lobby.css
+
+with:
+
+    data-lobby-theme="dfx2"
+
+Files:
+    dfx2/index.php
+    dfx2/server.php
+    dfx2/about.php
+
+The DFX2 server list also uses the dot-only status column immediately
+before CN so its table matches the DFX format.
+
+DFX2 DATABASE
+=============
+
+Default connection file:
+
+    /home/devilishservices/connections/dfx2/db.php
+
+Default tables:
+
+    dfx2_servers
+    dfx2_server_players
+
+Configuration:
+
+    dfx2/includes/config.php
+
+Compatible SQL schema:
+
+    dfx2/sql/dfx2_lobby_tables.sql
+
+Example database connection:
+
+    dfx2/db.example.php
+
+Do not use db.example.php without replacing the placeholder database
+credentials.
+
+CENTRAL COLOR EDITING
+=====================
+
+Open:
+
+    /assets/lobby.css
+
+Near the top you will see three sections:
+
+    body[data-lobby-theme="bhd"]
+    body[data-lobby-theme="dfx"]
+    body[data-lobby-theme="dfx2"]
+
+Change only those variables when you want to alter the color scheme
+without changing the shared layout.
+
+IMPORTANT
+=========
+
+Do not add separate lobby.css files back into DFX, DFX2 or BHD unless
+there is a specific game-only exception.
+
+The intended setup is one shared layout file:
+
+    /assets/lobby.css
