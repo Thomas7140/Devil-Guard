@@ -112,6 +112,179 @@ function bhd_bool(
     return $default;
 }
 
+function bhd_country_code(mixed $value): string
+{
+    if (is_array($value)) {
+        foreach (
+            [
+                'country_code',
+                'countrycode',
+                'code',
+                'iso2',
+                'iso',
+                'cc',
+                'cn',
+                'country',
+                'name',
+                'flag',
+            ] as $key
+        ) {
+            if (
+                array_key_exists($key, $value)
+                &&
+                $value[$key] !== null
+                &&
+                $value[$key] !== ''
+            ) {
+                $code = bhd_country_code($value[$key]);
+
+                if ($code !== '') {
+                    return $code;
+                }
+            }
+        }
+
+        return '';
+    }
+
+    $value = trim((string)$value);
+
+    if ($value === '') {
+        return '';
+    }
+
+    /*
+     * Already a clean ISO-3166 alpha-2 code.
+     */
+    if (preg_match('/^[A-Za-z]{2}$/', $value)) {
+        return strtoupper($value);
+    }
+
+    /*
+     * Handle flag filenames / paths such as:
+     *   flags/au.gif
+     *   /images/flags/us.png
+     *   country-de.svg
+     */
+    if (
+        preg_match(
+            '~(?:^|[/_\\.-])([A-Za-z]{2})(?:\.(?:gif|png|webp|svg|avif)|$)~i',
+            $value,
+            $match
+        )
+    ) {
+        return strtoupper($match[1]);
+    }
+
+    /*
+     * Common country-name values returned by older Nova/NovaHQ feeds.
+     */
+    $name =
+        strtolower(
+            preg_replace(
+                '/\s+/',
+                ' ',
+                trim($value)
+            )
+            ?? $value
+        );
+
+    $map = [
+        'australia' => 'AU',
+        'austria' => 'AT',
+        'belgium' => 'BE',
+        'brazil' => 'BR',
+        'canada' => 'CA',
+        'chile' => 'CL',
+        'china' => 'CN',
+        'croatia' => 'HR',
+        'czech republic' => 'CZ',
+        'czechia' => 'CZ',
+        'denmark' => 'DK',
+        'finland' => 'FI',
+        'france' => 'FR',
+        'germany' => 'DE',
+        'greece' => 'GR',
+        'hungary' => 'HU',
+        'ireland' => 'IE',
+        'italy' => 'IT',
+        'japan' => 'JP',
+        'mexico' => 'MX',
+        'netherlands' => 'NL',
+        'new zealand' => 'NZ',
+        'norway' => 'NO',
+        'poland' => 'PL',
+        'portugal' => 'PT',
+        'romania' => 'RO',
+        'russia' => 'RU',
+        'russian federation' => 'RU',
+        'south africa' => 'ZA',
+        'spain' => 'ES',
+        'sweden' => 'SE',
+        'switzerland' => 'CH',
+        'turkey' => 'TR',
+        'united kingdom' => 'GB',
+        'great britain' => 'GB',
+        'england' => 'GB',
+        'scotland' => 'GB',
+        'wales' => 'GB',
+        'united states' => 'US',
+        'united states of america' => 'US',
+        'usa' => 'US',
+        'us' => 'US',
+        'uk' => 'GB',
+    ];
+
+    return $map[$name] ?? '';
+}
+
+function bhd_country_from_row(array $row): string
+{
+    /*
+     * Try all field names seen in Nova/NovaHQ-era feeds.
+     */
+    foreach (
+        [
+            'country_code',
+            'countrycode',
+            'country_iso',
+            'countryiso',
+            'iso2',
+            'iso',
+            'cn',
+            'cc',
+            'country',
+            'country_name',
+            'countryname',
+            'flag',
+            'country_flag',
+            'countryflag',
+            'flag_url',
+            'flagurl',
+            'location',
+        ] as $key
+    ) {
+        $value =
+            bhd_pick(
+                $row,
+                [$key],
+                null
+            );
+
+        if ($value === null || $value === '') {
+            continue;
+        }
+
+        $code = bhd_country_code($value);
+
+        if ($code !== '') {
+            return $code;
+        }
+    }
+
+    return '';
+}
+
 function bhd_online(array $row): bool
 {
     $status =
@@ -204,16 +377,7 @@ function bhd_source_rows(
             );
 
         $country =
-            (string)bhd_pick(
-                $raw,
-                [
-                    'country_code',
-                    'country',
-                    'cn',
-                    'cc',
-                ],
-                ''
-            );
+            bhd_country_from_row($raw);
 
         $private =
             bhd_bool(
