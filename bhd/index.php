@@ -488,11 +488,166 @@ function bhd_online(array $row): bool
     return true;
 }
 
+function bhd_novahq_metadata_map(): array
+{
+    static $cache = null;
+
+    if (is_array($cache)) {
+        return $cache;
+    }
+
+    $cache = [];
+
+    $url = 'https://nw.novahq.net/bhd';
+    $html = '';
+
+    /*
+     * NovaHQ uses the flag image URL itself as the country value,
+     * for example:
+     *   /assets/lobby/png/flags/us.png
+     *
+     * It also exposes the game/mod icon in the row:
+     *   mod-bhd.png
+     *   mod-bhdts.png
+     */
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+
+        if ($ch !== false) {
+            curl_setopt_array(
+                $ch,
+                [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_CONNECTTIMEOUT => 4,
+                    CURLOPT_TIMEOUT => 7,
+                    CURLOPT_USERAGENT =>
+                        'DevilishServices-NovaLobby/1.0',
+                    CURLOPT_HTTPHEADER => [
+                        'Accept: text/html,application/xhtml+xml',
+                    ],
+                ]
+            );
+
+            $body = curl_exec($ch);
+
+            if (is_string($body)) {
+                $html = $body;
+            }
+
+            curl_close($ch);
+        }
+    }
+
+    if ($html === '') {
+        $context =
+            stream_context_create(
+                [
+                    'http' => [
+                        'method' => 'GET',
+                        'timeout' => 7,
+                        'header' =>
+                            "User-Agent: DevilishServices-NovaLobby/1.0\r\n" .
+                            "Accept: text/html,application/xhtml+xml\r\n",
+                    ],
+                    'ssl' => [
+                        'verify_peer' => true,
+                        'verify_peer_name' => true,
+                    ],
+                ]
+            );
+
+        $body =
+            @file_get_contents(
+                $url,
+                false,
+                $context
+            );
+
+        if (is_string($body)) {
+            $html = $body;
+        }
+    }
+
+    if ($html === '') {
+        return $cache;
+    }
+
+    if (
+        !preg_match_all(
+            '~<tr\\b[^>]*>(.*?)</tr>~is',
+            $html,
+            $rows
+        )
+    ) {
+        return $cache;
+    }
+
+    foreach ($rows[1] as $rowHtml) {
+        if (
+            !preg_match(
+                '~(?:/bhd/)?(?:info|server)/([0-9]{4,})~i',
+                $rowHtml,
+                $idMatch
+            )
+        ) {
+            /*
+             * NovaHQ currently links detail pages as /bhd/info/<id>.
+             * Keep a broader fallback for older/newer link formats.
+             */
+            if (
+                !preg_match(
+                    '~(?:info|server)[^0-9]{0,10}([0-9]{4,})~i',
+                    $rowHtml,
+                    $idMatch
+                )
+            ) {
+                continue;
+            }
+        }
+
+        $id = (string)$idMatch[1];
+
+        $country = '';
+
+        if (
+            preg_match(
+                '~assets/lobby/(?:png|svg)/flags/([a-z]{2})\\.(?:png|svg|gif|webp|avif)~i',
+                $rowHtml,
+                $countryMatch
+            )
+        ) {
+            $country =
+                strtoupper(
+                    (string)$countryMatch[1]
+                );
+        }
+
+        $teamSabre =
+            (bool)preg_match(
+                '~mod-bhdts\\.(?:png|svg|gif|webp|avif)~i',
+                $rowHtml
+            );
+
+        $cache[$id] = [
+            'country' => $country,
+            'team_sabre' => $teamSabre,
+        ];
+    }
+
+    return $cache;
+}
+
 function bhd_source_rows(
     array $rawRows,
     string $source
 ): array {
     $rows = [];
+
+    $novaHqMeta =
+        $source === 'novahq'
+        ? bhd_novahq_metadata_map()
+        : [];
 
     foreach ($rawRows as $raw) {
         if (!is_array($raw)) {
@@ -529,6 +684,17 @@ function bhd_source_rows(
 
         $country =
             bhd_country_from_row($raw);
+
+        if (
+            $country === ''
+            &&
+            $id !== ''
+            &&
+            isset($novaHqMeta[$id]['country'])
+        ) {
+            $country =
+                (string)$novaHqMeta[$id]['country'];
+        }
 
         $private =
             bhd_bool(
@@ -628,6 +794,15 @@ function bhd_source_rows(
 
         $isTeamSabre =
             bhd_is_team_sabre($raw);
+
+        if (
+            $id !== ''
+            &&
+            isset($novaHqMeta[$id]['team_sabre'])
+        ) {
+            $isTeamSabre =
+                (bool)$novaHqMeta[$id]['team_sabre'];
+        }
 
         $rows[] = [
             'id' => $id,
