@@ -91,3 +91,36 @@ DFX:
 
 DFX2:
     https://nova-lobby.devilishservices.com/dfx2/
+
+
+BHD DFX-STYLE HEADER
+====================
+
+To make the BHD header match the simple DFX-style navigation, run:
+
+    cd /home/devilishservices/public_html/sub-domains/nova-lobby.devilishservices.com
+    php tools/patch-bhd-dfx-style-header.php
+
+The patcher backs up:
+
+    bhd/partials.php
+
+before replacing only render_header().
+
+The new BHD header becomes:
+
+    Delta Force: Black Hawk Down
+    Devilish Services Nova Lobby
+
+    Main Lobby | BHD Lobby | About
+
+This removes the old visual header wording such as:
+
+    DEVILISH SERVICES
+    NOVA BHD LOBBY
+    Delta Force: Black Hawk Down Multiplayer Network
+    LIVE NETWORK
+    Servers | Gametypes | System
+
+from the shared page header while leaving the BHD server browser and
+the rest of the BHD page content unchanged.
