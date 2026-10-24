@@ -544,6 +544,39 @@ tbody tr:hover{
     font-weight:700;
 }
 
+.country-flag-wrap{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:30px;
+    min-height:20px;
+}
+
+.country-flag{
+    display:block;
+    width:28px;
+    height:18px;
+    object-fit:cover;
+    border-radius:3px;
+    border:1px solid rgba(255,255,255,.18);
+    box-shadow:0 2px 6px rgba(0,0,0,.22);
+}
+
+.country-code-fallback{
+    display:none;
+}
+
+.country-code{
+    color:color-mix(in srgb,var(--text) 76%,var(--muted));
+    font-weight:700;
+    font-size:11px;
+    letter-spacing:.04em;
+}
+
+.country-code-missing{
+    display:inline;
+}
+
 .name{
     font-weight:700;
 }
