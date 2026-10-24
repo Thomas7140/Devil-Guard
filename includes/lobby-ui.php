@@ -106,7 +106,8 @@ function lobby_flag_markup(string $country): string
     }
 
     $code = lobby_h($country);
-    $src = '/flages/' . rawurlencode($country) . '.png';
+    $filename = strtolower($country) . '.svg';
+    $src = '/flags/' . rawurlencode($filename);
 
     return
         '<span class="country-flag-wrap">' .
@@ -115,9 +116,7 @@ function lobby_flag_markup(string $country): string
                 ' src="' . lobby_h($src) . '"' .
                 ' alt="' . $code . '"' .
                 ' title="' . $code . '"' .
-                ' data-country="' . $code . '"' .
-                ' data-flag-stage="0"' .
-                ' onerror="lobbyFlagFallback(this)"' .
+                ' onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'inline\';"' .
             '>' .
             '<span class="country-code country-code-fallback">' .
                 $code .
@@ -1182,50 +1181,7 @@ function lobby_render_index(
 </div>
 
 
-<script>
-function lobbyFlagFallback(img){
-    var code = (img.dataset.country || '').trim();
-    var stage = parseInt(img.dataset.flagStage || '0', 10);
 
-    var variants = [
-        [code, 'gif'],
-        [code, 'webp'],
-        [code, 'svg'],
-        [code, 'avif'],
-        [code, 'jpg'],
-        [code, 'jpeg'],
-        [code.toLowerCase(), 'png'],
-        [code.toLowerCase(), 'gif'],
-        [code.toLowerCase(), 'webp'],
-        [code.toLowerCase(), 'svg'],
-        [code.toLowerCase(), 'avif'],
-        [code.toLowerCase(), 'jpg'],
-        [code.toLowerCase(), 'jpeg']
-    ];
-
-    if (!code || stage >= variants.length) {
-        img.style.display = 'none';
-
-        var fallback = img.parentElement
-            ? img.parentElement.querySelector('.country-code-fallback')
-            : null;
-
-        if (fallback) {
-            fallback.style.display = 'inline';
-        }
-
-        return;
-    }
-
-    var next = variants[stage];
-
-    img.dataset.flagStage = String(stage + 1);
-    img.src = '/flages/' +
-        encodeURIComponent(next[0]) +
-        '.' +
-        next[1];
-}
-</script>
 
 </body>
 </html>
