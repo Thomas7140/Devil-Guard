@@ -51,7 +51,8 @@ body{
 }
 .game-card{
     position:relative;
-    display:block;
+    display:flex;
+    flex-direction:column;
     min-height:430px;
     overflow:hidden;
     border:1px solid rgba(255,255,255,.11);
@@ -70,16 +71,26 @@ body{
 .game-card.dfx:hover{border-color:#60c7ff}
 .game-card.dfx2:hover{border-color:#ef9c51}
 .game-image{
-    position:absolute;
-    inset:0;
+    position:relative;
+    flex:0 0 245px;
+    height:245px;
+    display:grid;
+    place-items:center;
+    padding:12px;
+    background:
+        radial-gradient(circle at center,#162a3a 0,#09131d 72%,#050b10 100%);
+    border-bottom:1px solid rgba(255,255,255,.08);
 }
 .game-image img{
+    display:block;
     width:100%;
     height:100%;
-    object-fit:cover;
-    transition:transform .35s ease;
+    object-fit:contain;
+    object-position:center;
+    border-radius:12px;
+    transition:transform .25s ease;
 }
-.game-card:hover .game-image img{transform:scale(1.04)}
+.game-card:hover .game-image img{transform:scale(1.015)}
 .game-fallback{
     display:none;
     width:100%;
@@ -94,11 +105,13 @@ body{
 .overlay{
     position:absolute;
     inset:0;
+    pointer-events:none;
     background:
         linear-gradient(to bottom,
-            rgba(0,0,0,.04) 20%,
-            rgba(3,8,12,.28) 48%,
-            rgba(3,8,12,.95) 100%);
+            rgba(0,0,0,.02) 0%,
+            rgba(0,0,0,.00) 48%,
+            rgba(3,8,12,.22) 58%,
+            rgba(3,8,12,.82) 100%);
 }
 .badge{
     position:absolute;
@@ -124,11 +137,14 @@ body{
     box-shadow:0 0 9px rgba(39,215,123,.7);
 }
 .content{
-    position:absolute;
-    left:0;
-    right:0;
-    bottom:0;
-    padding:27px;
+    position:relative;
+    z-index:2;
+    flex:1;
+    padding:23px 25px 25px;
+    background:
+        linear-gradient(180deg,
+            rgba(12,22,31,.97) 0%,
+            rgba(7,14,20,.99) 100%);
 }
 .kicker{
     margin-bottom:7px;
@@ -171,7 +187,8 @@ body{
 }
 @media(max-width:980px){
     .games{grid-template-columns:1fr}
-    .game-card{min-height:360px}
+    .game-card{min-height:390px}
+    .game-image{flex-basis:230px;height:230px}
     .content p{min-height:0}
 }
 </style>
