@@ -154,6 +154,30 @@ function bhd_country_code(mixed $value): string
     }
 
     /*
+     * Some legacy parsers return flag HTML instead of a bare code.
+     * Example: <img src="/flags/au.gif" alt="AU">
+     */
+    if (
+        preg_match(
+            '~(?:src|href)\\s*=\\s*["\\\'][^"\\\']*[/_-]([A-Za-z]{2})\\.(?:gif|png|webp|svg|avif)["\\\']~i',
+            $value,
+            $match
+        )
+    ) {
+        return strtoupper($match[1]);
+    }
+
+    if (
+        preg_match(
+            '~(?:alt|title)\\s*=\\s*["\\\']([A-Za-z]{2})["\\\']~i',
+            $value,
+            $match
+        )
+    ) {
+        return strtoupper($match[1]);
+    }
+
+    /*
      * Already a clean ISO-3166 alpha-2 code.
      */
     if (preg_match('/^[A-Za-z]{2}$/', $value)) {
@@ -744,6 +768,8 @@ lobby_render_index(
         'hero_alt' => 'Delta Force: Black Hawk Down',
         'row_image' => '/images/DFBHD.avif',
         'first_column' => 'TS',
+        'show_status_column' => false,
+        'status_in_name' => true,
         'live_heading' => 'BHD Live Servers',
         'source_options' => $sourceOptions,
         'about_url' => 'about.php',
