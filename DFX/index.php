@@ -212,10 +212,10 @@ function selected(string $value, string $current): string
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Delta Force Xtreme Live Server List</title>
-<link rel="stylesheet" href="assets/lobby.css">
+<link rel="stylesheet" href="/assets/lobby.css">
 </head>
 
-<body>
+<body data-lobby-theme="dfx">
 
 <div class="wrap">
 
