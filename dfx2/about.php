@@ -18,12 +18,12 @@ About the DFX2 Lobby
 
 <link
     rel="stylesheet"
-    href="assets/lobby.css"
+    href="/assets/lobby.css"
 >
 
 </head>
 
-<body>
+<body data-lobby-theme="dfx2">
 
 <div class="wrap">
 
