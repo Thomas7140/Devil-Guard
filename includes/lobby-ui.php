@@ -97,6 +97,34 @@ function lobby_country(?string $code): string
         : '--';
 }
 
+function lobby_flag_markup(string $country): string
+{
+    $country = lobby_country($country);
+
+    if ($country === '--') {
+        return '<span class="country-code country-code-missing">--</span>';
+    }
+
+    $code = lobby_h($country);
+    $src = '/flages/' . rawurlencode($country) . '.png';
+
+    return
+        '<span class="country-flag-wrap">' .
+            '<img' .
+                ' class="country-flag"' .
+                ' src="' . lobby_h($src) . '"' .
+                ' alt="' . $code . '"' .
+                ' title="' . $code . '"' .
+                ' data-country="' . $code . '"' .
+                ' data-flag-stage="0"' .
+                ' onerror="lobbyFlagFallback(this)"' .
+            '>' .
+            '<span class="country-code country-code-fallback">' .
+                $code .
+            '</span>' .
+        '</span>';
+}
+
 function lobby_int(mixed $value, int $default = 0): int
 {
     if (is_int($value)) {
@@ -1056,7 +1084,7 @@ function lobby_render_index(
                             data-label="CN"
                             class="country"
                         >
-                            <?=lobby_h($server['country'])?>
+                            <?=lobby_flag_markup((string)$server['country'])?>
                         </td>
 
 
@@ -1152,6 +1180,52 @@ function lobby_render_index(
     </div>
 
 </div>
+
+
+<script>
+function lobbyFlagFallback(img){
+    var code = (img.dataset.country || '').trim();
+    var stage = parseInt(img.dataset.flagStage || '0', 10);
+
+    var variants = [
+        [code, 'gif'],
+        [code, 'webp'],
+        [code, 'svg'],
+        [code, 'avif'],
+        [code, 'jpg'],
+        [code, 'jpeg'],
+        [code.toLowerCase(), 'png'],
+        [code.toLowerCase(), 'gif'],
+        [code.toLowerCase(), 'webp'],
+        [code.toLowerCase(), 'svg'],
+        [code.toLowerCase(), 'avif'],
+        [code.toLowerCase(), 'jpg'],
+        [code.toLowerCase(), 'jpeg']
+    ];
+
+    if (!code || stage >= variants.length) {
+        img.style.display = 'none';
+
+        var fallback = img.parentElement
+            ? img.parentElement.querySelector('.country-code-fallback')
+            : null;
+
+        if (fallback) {
+            fallback.style.display = 'inline';
+        }
+
+        return;
+    }
+
+    var next = variants[stage];
+
+    img.dataset.flagStage = String(stage + 1);
+    img.src = '/flages/' +
+        encodeURIComponent(next[0]) +
+        '.' +
+        next[1];
+}
+</script>
 
 </body>
 </html>
