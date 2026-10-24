@@ -285,6 +285,131 @@ function bhd_country_from_row(array $row): string
     return '';
 }
 
+function bhd_is_team_sabre(array $row): bool
+{
+    /*
+     * Use explicit mod / expansion metadata only.
+     * Do NOT infer Team Sabre from the server name.
+     */
+    $booleanFields = [
+        'ts',
+        'is_ts',
+        'ists',
+        'team_sabre',
+        'teamsabre',
+        'is_team_sabre',
+        'isteamsabre',
+    ];
+
+    foreach ($booleanFields as $key) {
+        $value = bhd_pick(
+            $row,
+            [$key],
+            null
+        );
+
+        if ($value !== null) {
+            return bhd_bool($value, false);
+        }
+    }
+
+    $modFields = [
+        'mod',
+        'mod_name',
+        'modname',
+        'game_mod',
+        'gamemod',
+        'game',
+        'game_name',
+        'gamename',
+        'expansion',
+        'expansion_name',
+        'expansionname',
+        'product',
+        'product_code',
+        'productcode',
+        'game_code',
+        'gamecode',
+        'version_name',
+        'versionname',
+        'mod_image',
+        'modimage',
+        'mod_icon',
+        'modicon',
+    ];
+
+    foreach ($modFields as $key) {
+        $value = bhd_pick(
+            $row,
+            [$key],
+            null
+        );
+
+        if ($value === null || $value === '') {
+            continue;
+        }
+
+        if (is_array($value)) {
+            $value = implode(
+                ' ',
+                array_map(
+                    static fn ($v): string =>
+                        is_scalar($v)
+                            ? (string)$v
+                            : '',
+                    $value
+                )
+            );
+        }
+
+        $token = strtolower(
+            preg_replace(
+                '/[^a-z0-9]+/i',
+                '',
+                (string)$value
+            )
+            ?? ''
+        );
+
+        if (
+            in_array(
+                $token,
+                [
+                    'bhdts',
+                    'dfbhdts',
+                    'teamsabre',
+                    'teamssabre',
+                    'exp1',
+                    'modbhdts',
+                    'blackhawkdownteamsabre',
+                    'deltaforceblackhawkdownteamsabre',
+                ],
+                true
+            )
+        ) {
+            return true;
+        }
+
+        $text = strtolower(
+            trim((string)$value)
+        );
+
+        if (
+            str_contains($text, 'team sabre')
+            ||
+            str_contains($text, 'bhdts')
+            ||
+            str_contains($text, 'dfbhdts')
+            ||
+            str_contains($text, 'mod-bhdts')
+        ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 function bhd_online(array $row): bool
 {
     $status =
@@ -469,6 +594,9 @@ function bhd_source_rows(
             '&id=' .
             rawurlencode($id);
 
+        $isTeamSabre =
+            bhd_is_team_sabre($raw);
+
         $rows[] = [
             'id' => $id,
             'source' => $source,
@@ -482,7 +610,10 @@ function bhd_source_rows(
             'max_players' => $maxPlayers,
             'online' => bhd_online($raw),
             'view_url' => $viewUrl,
-            'image_url' => '/images/DFBHD.avif',
+            'image_url' =>
+                $isTeamSabre
+                ? '/images/DFBHDTS.avif'
+                : '/images/DFBHD.avif',
         ];
     }
 
@@ -604,7 +735,7 @@ lobby_render_index(
         'hero_image' => '/images/DFBHD.avif',
         'hero_alt' => 'Delta Force: Black Hawk Down',
         'row_image' => '/images/DFBHD.avif',
-        'first_column' => 'BHD',
+        'first_column' => 'TS',
         'live_heading' => 'BHD Live Servers',
         'source_options' => $sourceOptions,
         'about_url' => 'about.php',
