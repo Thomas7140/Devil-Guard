@@ -292,11 +292,8 @@ function bhd_is_team_sabre(array $row): bool
      * Do NOT infer Team Sabre from the server name.
      */
     $booleanFields = [
-        'ts',
         'is_ts',
         'ists',
-        'team_sabre',
-        'teamsabre',
         'is_team_sabre',
         'isteamsabre',
     ];
@@ -308,12 +305,17 @@ function bhd_is_team_sabre(array $row): bool
             null
         );
 
-        if ($value !== null) {
-            return bhd_bool($value, false);
+        if ($value === null || $value === '') {
+            continue;
         }
+
+        return bhd_bool($value, false);
     }
 
     $modFields = [
+        'ts',
+        'team_sabre',
+        'teamsabre',
         'mod',
         'mod_name',
         'modname',
@@ -510,6 +512,8 @@ function bhd_source_rows(
                     $raw,
                     [
                         'private',
+                        'is_private',
+                        'isprivate',
                         'passworded',
                         'password',
                         'locked',
@@ -536,6 +540,7 @@ function bhd_source_rows(
                 [
                     'mission',
                     'mission_name',
+                    'missionname',
                     'map',
                     'map_name',
                     'mapname',
@@ -561,6 +566,7 @@ function bhd_source_rows(
                 [
                     'players',
                     'player_count',
+                    'playercount',
                     'current_players',
                     'currentplayers',
                     'numplayers',
@@ -574,6 +580,8 @@ function bhd_source_rows(
                 [
                     'max_players',
                     'maxplayers',
+                    'max_player_count',
+                    'maxplayercount',
                     'player_limit',
                     'playerlimit',
                     'max',
