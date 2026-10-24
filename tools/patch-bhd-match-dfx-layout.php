@@ -12,8 +12,8 @@ declare(strict_types=1);
 |
 | The patch:
 | - backs up bhd/index.php and bhd/partials.php
-| - installs bhd/assets/dfx-layout.css
-| - replaces only render_header() with the DFX-style BHD header
+| - loads the central /assets/lobby.css shared by every lobby
+| - replaces only render_header() with the shared-layout BHD header
 | - removes the old BHD intro/branding panels from bhd/index.php
 | - preserves BHD server fetching, filters, table data, View/Join logic
 |
@@ -29,9 +29,6 @@ $bhdDir = $siteRoot . '/bhd';
 
 $indexFile = $bhdDir . '/index.php';
 $partialsFile = $bhdDir . '/partials.php';
-$assetsDir = $bhdDir . '/assets';
-$cssFile = $assetsDir . '/dfx-layout.css';
-
 foreach ([$indexFile, $partialsFile] as $required) {
     if (!is_file($required)) {
         fwrite(
@@ -40,14 +37,6 @@ foreach ([$indexFile, $partialsFile] as $required) {
         );
         exit(1);
     }
-}
-
-if (!is_dir($assetsDir) && !mkdir($assetsDir, 0755, true)) {
-    fwrite(
-        STDERR,
-        "Unable to create BHD assets directory:\n{$assetsDir}\n"
-    );
-    exit(1);
 }
 
 $stamp = date('Ymd-His');
@@ -67,32 +56,6 @@ if (!copy($partialsFile, $partialsBackup)) {
 
 /*
 |--------------------------------------------------------------------------
-| Copy the packaged DFX-match stylesheet into BHD/assets
-|--------------------------------------------------------------------------
-*/
-
-$packagedCss =
-    __DIR__ .
-    '/../bhd/assets/dfx-layout.css';
-
-if (!is_file($packagedCss)) {
-    fwrite(
-        STDERR,
-        "Packaged CSS file not found:\n{$packagedCss}\n"
-    );
-    exit(1);
-}
-
-if (!copy($packagedCss, $cssFile)) {
-    fwrite(
-        STDERR,
-        "Unable to install:\n{$cssFile}\n"
-    );
-    exit(1);
-}
-
-/*
-|--------------------------------------------------------------------------
 | Replace render_header() only
 |--------------------------------------------------------------------------
 */
@@ -104,7 +67,7 @@ if ($partials === false) {
     exit(1);
 }
 
-$marker = 'DEVILISH_BHD_DFX_LAYOUT_HEADER_V3';
+$marker = 'DEVILISH_BHD_SHARED_LAYOUT_HEADER_V4';
 
 $functionPos = strpos($partials, 'function render_header');
 
@@ -185,7 +148,7 @@ if ($endPos === null) {
 }
 
 $newHeader = <<<'PHP'
-/* DEVILISH_BHD_DFX_LAYOUT_HEADER_V3 */
+/* DEVILISH_BHD_SHARED_LAYOUT_HEADER_V4 */
 function render_header(string $title = '', string $active = ''): void
 {
     $pageTitle =
@@ -229,11 +192,11 @@ function render_header(string $title = '', string $active = ''): void
 
 <link
     rel="stylesheet"
-    href="<?=e(base_url('assets/dfx-layout.css'))?>"
+    href="/assets/lobby.css"
 >
 </head>
 
-<body>
+<body data-lobby-theme="bhd">
 
 <header class="devilish-bhd-topbar">
 
@@ -478,11 +441,11 @@ if (
 }
 
 echo
-    "BHD lobby DFX-style layout installed.\n\n" .
+    "BHD lobby shared DFX-format layout installed.\n\n" .
     "Updated:\n" .
     "  {$indexFile}\n" .
     "  {$partialsFile}\n" .
-    "  {$cssFile}\n\n" .
+    "  /assets/lobby.css (shared)\n\n" .
     "Backups:\n" .
     "  {$indexBackup}\n" .
     "  {$partialsBackup}\n\n" .
