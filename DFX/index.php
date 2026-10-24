@@ -462,6 +462,7 @@ function selected(string $value, string $current): string
 
             <colgroup>
                 <col class="col-game">
+                <col class="col-status">
                 <col class="col-cn">
                 <col class="col-name">
                 <col class="col-private">
@@ -476,6 +477,7 @@ function selected(string $value, string $current): string
 
             <tr>
                 <th>DFX</th>
+                <th class="status-head" aria-label="Status"></th>
                 <th>CN</th>
                 <th>Name</th>
                 <th>Private</th>
@@ -501,10 +503,6 @@ function selected(string $value, string $current): string
                     ? 'offline'
                     : ($players === 0 ? 'idle' : 'playing');
 
-                $status = !$online
-                    ? 'Offline'
-                    : ($players === 0 ? 'Online - waiting' : 'Online');
-
                 $timeLeft = trim((string)($server['time_left'] ?? ''));
 
                 if ($timeLeft === '') {
@@ -523,6 +521,27 @@ function selected(string $value, string $current): string
                             alt="DFX"
                         >
 
+                    </td>
+
+
+                    <td
+                        data-label="Status"
+                        class="status-cell"
+                        title="<?= !$online
+                            ? 'Offline'
+                            : ($players === 0
+                                ? 'Online - empty'
+                                : 'Online') ?>"
+                        aria-label="<?= !$online
+                            ? 'Offline'
+                            : ($players === 0
+                                ? 'Online - empty'
+                                : 'Online') ?>"
+                    >
+                        <span
+                            class="dot <?= dfx_h($dot) ?>"
+                            aria-hidden="true"
+                        ></span>
                     </td>
 
 
@@ -546,18 +565,6 @@ function selected(string $value, string $current): string
                                     ?? 'Unnamed Server'
                                 )
                             ) ?>
-                        </div>
-
-                        <div class="statusline">
-
-                            <span
-                                class="dot <?= dfx_h($dot) ?>"
-                            ></span>
-
-                            <span>
-                                <?= dfx_h($status) ?>
-                            </span>
-
                         </div>
 
                     </td>
