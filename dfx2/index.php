@@ -461,12 +461,12 @@ Delta Force Xtreme 2 Live Server List
 
 <link
     rel="stylesheet"
-    href="assets/lobby.css"
+    href="/assets/lobby.css"
 >
 
 </head>
 
-<body>
+<body data-lobby-theme="dfx2">
 
 <div class="wrap">
 
@@ -924,6 +924,7 @@ Delta Force Xtreme 2 Live Server List
 
 <colgroup>
     <col class="col-game">
+    <col class="col-status">
     <col class="col-cn">
     <col class="col-name">
     <col class="col-private">
@@ -939,6 +940,7 @@ Delta Force Xtreme 2 Live Server List
 
 <tr>
     <th>DFX2</th>
+    <th class="status-head" aria-label="Status"></th>
     <th>CN</th>
     <th>Name</th>
     <th>Private</th>
@@ -975,15 +977,6 @@ $dot =
         : 'playing'
     );
 
-$status =
-    !$online
-    ? 'Offline'
-    : (
-        $players === 0
-        ? 'Online - waiting'
-        : 'Online'
-    );
-
 $timeLeft =
     trim(
         (string)(
@@ -1017,6 +1010,33 @@ if ($timeLeft === '') {
 
 
 <td
+    data-label="Status"
+    class="status-cell"
+    title="<?= !$online
+        ? 'Offline'
+        : (
+            $players === 0
+            ? 'Online - empty'
+            : 'Online'
+        ) ?>"
+    aria-label="<?= !$online
+        ? 'Offline'
+        : (
+            $players === 0
+            ? 'Online - empty'
+            : 'Online'
+        ) ?>"
+>
+
+    <span
+        class="dot <?= dfx2_h($dot) ?>"
+        aria-hidden="true"
+    ></span>
+
+</td>
+
+
+<td
     data-label="CN"
     class="country"
 >
@@ -1044,19 +1064,6 @@ if ($timeLeft === '') {
                 ?? 'Unnamed Server'
             )
         ) ?>
-
-    </div>
-
-
-    <div class="statusline">
-
-        <span
-            class="dot <?= dfx2_h($dot) ?>"
-        ></span>
-
-        <span>
-            <?= dfx2_h($status) ?>
-        </span>
 
     </div>
 
