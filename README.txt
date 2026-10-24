@@ -1,81 +1,93 @@
-DFX Lobby - BHD-Style Layout
-================================
+Devilish Services Nova Lobby - 3 Game Update
+================================================
 
-This package updates the Devilish Services DFX web lobby so it follows
-the same overall layout and controls used by the BHD lobby, while using
-DFX blue / steel / cyan styling and the DFX database.
+This package adds/updates:
 
-Target:
-  https://nova-lobby.devilishservices.com/DFX/
+1. Main root lobby:
+   https://nova-lobby.devilishservices.com/
 
-Server path:
-  /home/devilishservices/public_html/sub-domains/nova-lobby.devilishservices.com/DFX/
+   Panels:
+   - BHD  -> /bhd/
+   - DFX  -> /DFX/
+   - DFX2 -> /dfx2/
 
-IMPORTANT
----------
-Keep the existing file:
+   Root panel images:
+   - /images/DFBHD.avif
+   - /images/DFX.avif
+   - /images/DFX2.avif
 
-  DFX/dfx.webp
+2. DFX lobby
+   The existing DFX BHD-style lobby remains in /DFX/.
 
-The lobby uses that image for the DFX header and the first column of the
-server list.
+3. DFX2 lobby
+   A new BHD-style lobby is provided in /dfx2/.
 
-Updated lobby features
-----------------------
-- Servers summary counter
-- Players Online summary counter
-- Active Servers summary counter
-- Private server summary counter
-- Search filter
-- Source filter
-- Game type filter
-- Population filter
-- Sort filter
-- Apply button
-- Reset link
-- BHD-style full server table
-- DFX / CN / Name / Private / Type / Mission / Time Left / Players / Info
-- No horizontal scrolling server list on smaller screens
-- DFX Nova ~0 through ~9 colour rendering
-- Slow flashing green dot for online empty servers
-- Solid green dot for servers with players
-- Red dot for stale/offline servers
-- DFX server details page
-- DFX About page
+4. BHD Main Lobby button
+   The package intentionally does NOT replace your existing working
+   bhd/index.php.
 
-Database
---------
-The lobby reads:
+   Run this once after uploading the package:
 
-  /home/devilishservices/connections/dfx/db.php
+       cd /home/devilishservices/public_html/sub-domains/nova-lobby.devilishservices.com
+       php tools/patch-bhd-main-lobby.php
 
-and uses:
+   The script:
+   - locates bhd/index.php
+   - makes a timestamped backup
+   - adds a fixed "Main Lobby" button linking to /
+   - refuses to patch it twice
 
-  dfx_servers
-  dfx_server_players
+DFX2 DATABASE
+=============
 
-A server is active when status='online' and last_heartbeat_at is no more
-than 120 seconds old.
+Default connection file:
 
-Time Left
----------
-The current dfx_servers schema does not require a time_left column.
-The lobby displays --:-- when no time_left value exists. If a time_left
-column is added later and populated by the native DFX protocol, the lobby
-will use it automatically.
+    /home/devilishservices/connections/dfx2/db.php
 
-Install
--------
-Upload/overwrite:
+Default tables:
 
-  DFX/index.php
-  DFX/server.php
-  DFX/about.php
-  DFX/includes/functions.php
-  DFX/assets/lobby.css
+    dfx2_servers
+    dfx2_server_players
 
-Do not delete your existing DFX/dfx.webp.
+Edit:
 
-Test:
-  https://nova-lobby.devilishservices.com/DFX/
-  https://nova-lobby.devilishservices.com/DFX/server.php?id=1
+    dfx2/includes/config.php
+
+if your path or table names are different.
+
+A compatible schema is included at:
+
+    dfx2/sql/dfx2_lobby_tables.sql
+
+An example PDO connection file is included at:
+
+    dfx2/db.example.php
+
+Do not upload db.example.php into the shared connections directory
+without replacing the placeholder username/password.
+
+IMAGES
+======
+
+This package references the image files already on your web server:
+
+    images/DFBHD.avif
+    images/DFX.avif
+    images/DFX2.avif
+
+Make sure the capitalization matches exactly.
+
+TEST URLS
+=========
+
+Main:
+    https://nova-lobby.devilishservices.com/
+
+BHD:
+    https://nova-lobby.devilishservices.com/bhd/
+
+DFX:
+    https://nova-lobby.devilishservices.com/DFX/
+
+DFX2:
+    https://nova-lobby.devilishservices.com/dfx2/
