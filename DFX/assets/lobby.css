@@ -299,6 +299,7 @@ table{
 }
 
 col.col-game{width:68px}
+col.col-status{width:34px}
 col.col-cn{width:58px}
 col.col-name{width:22%}
 col.col-private{width:74px}
@@ -347,6 +348,23 @@ tbody tr:hover{
     border-radius:7px;
     border:1px solid #3b759c;
     box-shadow:0 5px 13px rgba(0,0,0,.25);
+}
+
+.status-head{
+    width:34px;
+    padding-left:4px;
+    padding-right:4px;
+}
+
+.status-cell{
+    width:34px;
+    padding-left:4px;
+    padding-right:4px;
+    text-align:center;
+}
+
+.status-cell .dot{
+    margin:0 auto;
 }
 
 .country{
@@ -584,7 +602,7 @@ tbody tr:hover{
 
     tr.server-row{
         display:grid;
-        grid-template-columns:72px 1fr 1fr;
+        grid-template-columns:72px 38px 1fr 1fr;
         gap:0;
         margin:8px 0;
         border:1px solid var(--line);
@@ -621,6 +639,17 @@ tbody tr:hover{
     }
 
     tr.server-row td.game-cell::before{
+        display:none;
+    }
+
+    tr.server-row td.status-cell{
+        grid-row:span 2;
+        display:grid;
+        place-items:center;
+        padding:12px 6px;
+    }
+
+    tr.server-row td.status-cell::before{
         display:none;
     }
 
@@ -674,15 +703,19 @@ tbody tr:hover{
     }
 
     tr.server-row{
-        grid-template-columns:64px 1fr;
+        grid-template-columns:64px 34px 1fr;
     }
 
     tr.server-row td.name{
         grid-column:auto;
     }
 
-    tr.server-row td:not(.game-cell){
+    tr.server-row td.status-cell{
         grid-column:2;
+    }
+
+    tr.server-row td:not(.game-cell):not(.status-cell){
+        grid-column:3;
     }
 
     .hero-brand{
