@@ -14,7 +14,7 @@ declare(strict_types=1);
 | - backs up bhd/index.php and bhd/partials.php
 | - installs bhd/assets/dfx-layout.css
 | - replaces only render_header() with the DFX-style BHD header
-| - changes the old BHD hero wording to the DFX-style wording when found
+| - removes the old BHD intro/branding panels from bhd/index.php
 | - preserves BHD server fetching, filters, table data, View/Join logic
 |
 */
@@ -300,8 +300,10 @@ if (
 
 /*
 |--------------------------------------------------------------------------
-| Change the old BHD hero wording to match DFX where those exact strings
-| exist. This is text-only; server logic is not touched.
+| Remove the old BHD intro / branding panels from the lobby index.
+|
+| We only remove complete section/div blocks when they contain one of the
+| known legacy BHD headings. The server list/data PHP below is left intact.
 |--------------------------------------------------------------------------
 */
 
@@ -315,22 +317,151 @@ if ($index === false) {
     exit(1);
 }
 
-$replacements = [
-    'MULTIPLAYER SERVER BROWSER'
-        => 'LIVE SERVER LIST',
-
-    'Find a BHD server'
-        => 'Delta Force: Black Hawk Down',
-
-    'Live Delta Force: Black Hawk Down servers with Nova-style metadata, country flags, server status and player counts.'
-        => 'Delta Force: Black Hawk Down multiplayer servers',
+$legacyNeedles = [
+    'MULTIPLAYER SERVER BROWSER',
+    'Find a BHD server',
+    'Live Delta Force: Black Hawk Down servers with Nova-style metadata',
+    'NOVA BHD LOBBY',
+    'Delta Force: Black Hawk Down Multiplayer Network',
+    'LIVE NETWORK',
 ];
 
-$index = str_replace(
-    array_keys($replacements),
-    array_values($replacements),
-    $index
-);
+$removedBlocks = 0;
+
+$removeLegacyBlock =
+    static function (
+        string $html,
+        string $tag
+    ) use (
+        $legacyNeedles,
+        &$removedBlocks
+    ): string {
+
+        $pattern =
+            '~<' .
+            $tag .
+            '\\b[^>]*>.*?</' .
+            $tag .
+            '>~is';
+
+        return (string)preg_replace_callback(
+            $pattern,
+            static function (
+                array $match
+            ) use (
+                $legacyNeedles,
+                &$removedBlocks
+            ): string {
+
+                $plain =
+                    html_entity_decode(
+                        strip_tags($match[0]),
+                        ENT_QUOTES | ENT_HTML5,
+                        'UTF-8'
+                    );
+
+                foreach ($legacyNeedles as $needle) {
+
+                    if (
+                        stripos(
+                            $plain,
+                            $needle
+                        ) !== false
+                    ) {
+                        $removedBlocks++;
+                        return '';
+                    }
+                }
+
+                return $match[0];
+            },
+            $html
+        );
+    };
+
+/*
+ * First remove section-based intro panels, then known wrapper divs.
+ * This handles both the current hero-panel markup and older BHD builds.
+ */
+$index =
+    $removeLegacyBlock(
+        $index,
+        'section'
+    );
+
+$index =
+    $removeLegacyBlock(
+        $index,
+        'header'
+    );
+
+/*
+ * If a legacy hero was built with a div instead of section/header,
+ * remove only divs whose class name clearly identifies them as a hero,
+ * intro or network panel and that contain one of the old headings.
+ */
+$index =
+    (string)preg_replace_callback(
+        '~<div\\b([^>]*)>.*?</div>~is',
+        static function (
+            array $match
+        ) use (
+            $legacyNeedles,
+            &$removedBlocks
+        ): string {
+
+            $attrs =
+                strtolower(
+                    (string)(
+                        $match[1]
+                        ?? ''
+                    )
+                );
+
+            if (
+                !preg_match(
+                    '/class\\s*=\\s*["\\\'][^"\\\']*(hero|intro|network)[^"\\\']*["\\\']/i',
+                    $attrs
+                )
+            ) {
+                return $match[0];
+            }
+
+            $plain =
+                html_entity_decode(
+                    strip_tags($match[0]),
+                    ENT_QUOTES | ENT_HTML5,
+                    'UTF-8'
+                );
+
+            foreach ($legacyNeedles as $needle) {
+
+                if (
+                    stripos(
+                        $plain,
+                        $needle
+                    ) !== false
+                ) {
+                    $removedBlocks++;
+                    return '';
+                }
+            }
+
+            return $match[0];
+        },
+        $index
+    );
+
+/*
+ * Remove empty whitespace left behind by removed panels.
+ */
+$index =
+    preg_replace(
+        "/(?:\\r?\\n){3,}/",
+        "\n\n",
+        $index
+    )
+    ?? $index;
 
 if (
     file_put_contents(
@@ -355,4 +486,5 @@ echo
     "Backups:\n" .
     "  {$indexBackup}\n" .
     "  {$partialsBackup}\n\n" .
+    "Removed legacy BHD intro/branding panels: {$removedBlocks}\n" .
     "BHD data sources and server logic were left intact.\n";
