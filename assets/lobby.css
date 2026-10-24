@@ -552,6 +552,20 @@ tbody tr:hover{
     line-height:1.25;
 }
 
+.server-name.with-status{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.server-name.with-status .dot{
+    flex:0 0 9px;
+}
+
+.server-name-text{
+    min-width:0;
+}
+
 .private.yes{
     color:var(--yellow);
     font-weight:700;
