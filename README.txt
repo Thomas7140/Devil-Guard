@@ -124,3 +124,35 @@ This removes the old visual header wording such as:
 
 from the shared page header while leaving the BHD server browser and
 the rest of the BHD page content unchanged.
+
+
+BHD MATCH DFX LAYOUT
+====================
+
+To make /bhd/ use the same layout style as /DFX/, upload this package
+over the nova-lobby site root and run:
+
+    cd /home/devilishservices/public_html/sub-domains/nova-lobby.devilishservices.com
+    php tools/patch-bhd-match-dfx-layout.php
+
+This patch:
+
+- keeps the existing BHD PHP/server-fetch logic
+- keeps Nova/NovaHQ sources
+- keeps BHD filters and server metadata
+- keeps View/Join behavior
+- backs up bhd/index.php
+- backs up bhd/partials.php
+- installs bhd/assets/dfx-layout.css
+- changes the BHD shared header to:
+      Delta Force: Black Hawk Down
+      Devilish Services Nova Lobby
+      Main Lobby | BHD Lobby | About
+- changes the hero wording to:
+      LIVE SERVER LIST
+      Delta Force: Black Hawk Down
+      Delta Force: Black Hawk Down multiplayer servers
+- styles the BHD stat cards, filters, table, buttons and responsive
+  layout to match the DFX lobby geometry and spacing
+
+The BHD theme remains green rather than DFX blue.
