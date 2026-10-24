@@ -525,6 +525,8 @@ function lobby_render_index(
     $heroImage = (string)($config['hero_image'] ?? '');
     $heroAlt = (string)($config['hero_alt'] ?? $title);
     $firstColumn = (string)($config['first_column'] ?? 'Game');
+    $showStatusColumn = (bool)($config['show_status_column'] ?? true);
+    $statusInName = (bool)($config['status_in_name'] ?? false);
     $liveHeading = (string)($config['live_heading'] ?? ($lobbyLabel . ' Live Servers'));
     $footer = (string)($config['footer'] ?? ('Devilish Services • ' . $title . ' Nova Lobby'));
     $aboutUrl = (string)($config['about_url'] ?? 'about.php');
@@ -947,7 +949,9 @@ function lobby_render_index(
 
                 <colgroup>
                     <col class="col-game">
-                    <col class="col-status">
+                    <?php if ($showStatusColumn): ?>
+                        <col class="col-status">
+                    <?php endif; ?>
                     <col class="col-cn">
                     <col class="col-name">
                     <col class="col-private">
@@ -962,10 +966,12 @@ function lobby_render_index(
 
                 <tr>
                     <th><?=lobby_h($firstColumn)?></th>
-                    <th
-                        class="status-head"
-                        aria-label="Status"
-                    ></th>
+                    <?php if ($showStatusColumn): ?>
+                        <th
+                            class="status-head"
+                            aria-label="Status"
+                        ></th>
+                    <?php endif; ?>
                     <th>CN</th>
                     <th>Name</th>
                     <th>Private</th>
@@ -1027,19 +1033,23 @@ function lobby_render_index(
                         </td>
 
 
-                        <td
-                            data-label="Status"
-                            class="status-cell"
-                            title="<?=lobby_h($statusText)?>"
-                            aria-label="<?=lobby_h($statusText)?>"
-                        >
+                        <?php if ($showStatusColumn): ?>
 
-                            <span
-                                class="dot <?=lobby_h($dot)?>"
-                                aria-hidden="true"
-                            ></span>
+                            <td
+                                data-label="Status"
+                                class="status-cell"
+                                title="<?=lobby_h($statusText)?>"
+                                aria-label="<?=lobby_h($statusText)?>"
+                            >
 
-                        </td>
+                                <span
+                                    class="dot <?=lobby_h($dot)?>"
+                                    aria-hidden="true"
+                                ></span>
+
+                            </td>
+
+                        <?php endif; ?>
 
 
                         <td
@@ -1055,8 +1065,20 @@ function lobby_render_index(
                             class="name"
                         >
 
-                            <div class="server-name">
-                                <?=lobby_nova_name((string)$server['name'])?>
+                            <div class="server-name<?= $statusInName ? ' with-status' : '' ?>">
+
+                                <?php if ($statusInName): ?>
+                                    <span
+                                        class="dot <?=lobby_h($dot)?>"
+                                        title="<?=lobby_h($statusText)?>"
+                                        aria-label="<?=lobby_h($statusText)?>"
+                                    ></span>
+                                <?php endif; ?>
+
+                                <span class="server-name-text">
+                                    <?=lobby_nova_name((string)$server['name'])?>
+                                </span>
+
                             </div>
 
                         </td>
