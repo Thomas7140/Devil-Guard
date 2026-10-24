@@ -41,9 +41,9 @@ $playerCount=$server ? max((int)($server['current_players']??0),count($players))
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title><?= $server ? dfx_h(dfx_clean_name((string)$server['server_name'])) : 'DFX Server' ?></title>
-<link rel="stylesheet" href="assets/lobby.css">
+<link rel="stylesheet" href="/assets/lobby.css">
 </head>
-<body>
+<body data-lobby-theme="dfx">
 <div class="wrap">
 <div class="topbar">
   <div class="brand"><h1>Delta Force Xtreme</h1><p>Server Information</p></div>
